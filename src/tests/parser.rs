@@ -87,10 +87,17 @@ fn parse_invalid_num() {
     /* invalid number */
     invalid_assert!("+0", InvalidValue);
     invalid_assert!("+1", InvalidValue);
+    invalid_assert!("001", InvalidValue);
+    invalid_assert!("00.1", InvalidValue);
     invalid_assert!(".123", InvalidValue); /* at least one digit before '.' */
     invalid_assert!("1.", InvalidValue); /* at least one digit after '.' */
+    invalid_assert!("0.", InvalidValue); /* at least one digit after '.' */
     invalid_assert!("INF", InvalidValue);
     invalid_assert!("inf", InvalidValue);
     invalid_assert!("NAN", InvalidValue);
     invalid_assert!("nan", InvalidValue);
+    invalid_assert!("-", InvalidValue);
+    invalid_assert!("1u10", InvalidValue); /* bad exp field */
+    invalid_assert!("1ee", InvalidValue); /* bad exp field */
+    invalid_assert!("1e", InvalidValue); /* bad exp field */
 }

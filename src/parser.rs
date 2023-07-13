@@ -186,7 +186,7 @@ impl Parser<'_> {
                     iter.next(); /* continue parsing */
                 }
                 _ => {
-                    return Err(Errors::InvalidValue);
+                    unreachable!();
                 }
             }
 
