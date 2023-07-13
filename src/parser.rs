@@ -152,69 +152,63 @@ impl Parser<'_> {
         }
 
         /* match the digits before decimal point */
-        match iter.next() {
-            Some('0') => { /* continue */ }
-            Some(c) => match c.is_ascii_digit() {
-                true => iter.consume_digits(0)?,
-                false => return Err(Errors::InvalidValue),
-            },
-            None => return Err(Errors::InvalidValue),
+        if let Some(c) = iter.next() {
+            match c {
+                '0' => { /* continue */ }
+                c => match c.is_ascii_digit() {
+                    true => iter.consume_digits(0)?,
+                    false => return Err(Errors::InvalidValue),
+                },
+            }
+        } else {
+            return Err(Errors::InvalidValue);
         }
 
         /* match decimal point */
-        match iter.peek() {
-            None => { /* no fraction part, continue */ }
-            Some(c) => {
-                match c {
-                    '.' => {
-                        iter.next(); /* skip the decimal point */
-                        iter.consume_digits(1)?
-                    }
-                    'e' | 'E' => { /* exp field, continue */ }
-                    _ => {
-                        return Err(Errors::InvalidValue);
-                    }
+        if let Some(c) = iter.peek() {
+            match c {
+                '.' => {
+                    iter.next(); /* skip the decimal point */
+                    iter.consume_digits(1)?
+                }
+                'e' | 'E' => { /* exp field, continue */ }
+                _ => {
+                    return Err(Errors::InvalidValue);
                 }
             }
         }
 
         /* match exponential field */
-        match iter.peek() {
-            None => { /* no exp field, continue */ }
-            Some(c) => {
-                /* match e | E */
-                match c {
-                    'e' | 'E' => {
-                        iter.next(); /* continue parsing */
-                    }
-                    _ => {
-                        return Err(Errors::InvalidValue);
-                    }
+        if let Some(c) = iter.peek() {
+            /* match e | E */
+            match c {
+                'e' | 'E' => {
+                    iter.next(); /* continue parsing */
                 }
+                _ => {
+                    return Err(Errors::InvalidValue);
+                }
+            }
 
-                /* match + | - */
-                match iter.peek() {
-                    None => {
-                        return Err(Errors::InvalidValue);
+            /* match + | - */
+            if let Some(c) = iter.peek() {
+                match c {
+                    '+' | '-' => {
+                        iter.next();
                     }
-                    Some(c) => {
-                        match c {
-                            '+' | '-' => {
-                                iter.next();
-                            }
-                            /* + | - is optional, if not appear, can only follow digits */
-                            _ => {
-                                if !c.is_ascii_digit() {
-                                    return Err(Errors::InvalidValue);
-                                }
-                            }
+                    /* + | - is optional, if not appear, can only follow digits */
+                    _ => {
+                        if !c.is_ascii_digit() {
+                            return Err(Errors::InvalidValue);
                         }
                     }
                 }
-
-                /* match one or more digits */
-                iter.consume_digits(1)?;
+            } else {
+                return Err(Errors::InvalidValue);
             }
+
+            /* match one or more digits */
+            iter.consume_digits(1)?;
         }
         // F**king Painful! I will definitely use regex in the future :)
         // Regex Ver: r"(?:^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)"
