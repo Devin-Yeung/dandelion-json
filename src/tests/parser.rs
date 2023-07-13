@@ -6,7 +6,7 @@ use std::fmt::Debug;
 fn parse_assert<S, E>(json: S, expect: &E)
 where
     S: AsRef<str>,
-    E: Eq + Debug,
+    E: PartialEq + Debug,
     std::result::Result<Value, Errors>: PartialEq<E>,
 {
     assert_eq!(&Parser::parse(&json), expect)
