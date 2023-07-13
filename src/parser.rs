@@ -68,37 +68,15 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_null(&mut self) -> Result<Value> {
-        return match self.context.peek(4) == "null" {
+    fn parse_literal<S>(&mut self, literal: S, v_type: ValueType) -> Result<Value>
+    where
+        S: AsRef<str>,
+    {
+        let literal = literal.as_ref();
+        return match self.context.peek(literal.len()) == literal {
             true => {
-                self.context.advance_n(4);
-                Ok(Value {
-                    v_type: ValueType::Null,
-                })
-            }
-            false => Err(Errors::InvalidValue),
-        };
-    }
-
-    fn parse_true(&mut self) -> Result<Value> {
-        return match self.context.peek(4) == "true" {
-            true => {
-                self.context.advance_n(4);
-                Ok(Value {
-                    v_type: ValueType::Bool(true),
-                })
-            }
-            false => Err(Errors::InvalidValue),
-        };
-    }
-
-    fn parse_false(&mut self) -> Result<Value> {
-        return match self.context.peek(5) == "false" {
-            true => {
-                self.context.advance_n(5);
-                Ok(Value {
-                    v_type: ValueType::Bool(false),
-                })
+                self.context.advance_n(literal.len());
+                Ok(Value { v_type })
             }
             false => Err(Errors::InvalidValue),
         };
@@ -108,9 +86,9 @@ impl Parser<'_> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
             Some(c) => match c {
-                't' => self.parse_true(),
-                'f' => self.parse_false(),
-                'n' => self.parse_null(),
+                't' => self.parse_literal("true", ValueType::Bool(true)),
+                'f' => self.parse_literal("false", ValueType::Bool(false)),
+                'n' => self.parse_literal("null", ValueType::Null),
                 _ => Err(Errors::InvalidValue),
             },
         };
