@@ -1,46 +1,36 @@
-use crate::data::{Value, ValueType};
-use crate::errors::Errors;
-use crate::parser::Parser;
-use std::fmt::Debug;
-
-fn parse_assert<S, E>(json: S, expect: &E)
-where
-    S: AsRef<str>,
-    E: PartialEq + Debug,
-    std::result::Result<Value, Errors>: PartialEq<E>,
-{
-    assert_eq!(&Parser::parse(&json), expect)
+macro_rules! json_assert {
+    ($json:expr, $vtype:expr) => {{
+        use $crate::data::ValueType::*;
+        assert_eq!(
+            $crate::parser::Parser::parse(&$json),
+            Ok($crate::data::Value { v_type: $vtype })
+        )
+    }};
 }
 
 #[test]
 fn parse_null() {
-    let null = Ok(Value {
-        v_type: ValueType::Null,
-    });
-    parse_assert("null", &null);
-    parse_assert(" null", &null);
-    parse_assert("\n null", &null);
-    parse_assert("\t null", &null);
+    json_assert!("null", Null);
+    json_assert!("null", Null);
+    json_assert!(" null", Null);
+    json_assert!("\n null", Null);
+    json_assert!("\t null", Null);
 }
 
 #[test]
 fn parse_true() {
-    let true_ = Ok(Value {
-        v_type: ValueType::Bool(true),
-    });
-    parse_assert("true", &true_);
-    parse_assert(" true", &true_);
-    parse_assert("\n true", &true_);
-    parse_assert("\t true", &true_);
+    json_assert!("true", Bool(true));
+    json_assert!("true", Bool(true));
+    json_assert!(" true", Bool(true));
+    json_assert!("\n true", Bool(true));
+    json_assert!("\t true", Bool(true));
 }
 
 #[test]
 fn parse_false() {
-    let false_ = Ok(Value {
-        v_type: ValueType::Bool(false),
-    });
-    parse_assert("false", &false_);
-    parse_assert(" false", &false_);
-    parse_assert("\n false", &false_);
-    parse_assert("\t false", &false_);
+    json_assert!("false", Bool(false));
+    json_assert!("false", Bool(false));
+    json_assert!(" false", Bool(false));
+    json_assert!("\n false", Bool(false));
+    json_assert!("\t false", Bool(false));
 }
