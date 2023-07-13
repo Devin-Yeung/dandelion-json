@@ -80,10 +80,36 @@ impl Parser<'_> {
         };
     }
 
+    fn parse_true(&mut self) -> Result<Value> {
+        return match self.context.peek(4) == "true" {
+            true => {
+                self.context.advance_n(4);
+                Ok(Value {
+                    v_type: ValueType::Bool(true),
+                })
+            }
+            false => Err(Errors::InvalidValue),
+        };
+    }
+
+    fn parse_false(&mut self) -> Result<Value> {
+        return match self.context.peek(5) == "false" {
+            true => {
+                self.context.advance_n(5);
+                Ok(Value {
+                    v_type: ValueType::Bool(false),
+                })
+            }
+            false => Err(Errors::InvalidValue),
+        };
+    }
+
     fn parse_value(&mut self) -> Result<Value> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
             Some(c) => match c {
+                't' => self.parse_true(),
+                'f' => self.parse_false(),
                 'n' => self.parse_null(),
                 _ => Err(Errors::InvalidValue),
             },
