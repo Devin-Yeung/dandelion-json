@@ -40,6 +40,28 @@ impl Iter<'_> {
     pub fn looked(&mut self) -> &str {
         &self.partial_json[..self.cursor]
     }
+
+    fn consume_digits(&mut self, min: usize) -> Result<()> {
+        let mut cnt: usize = 0;
+        /* consume at least n digits */
+        while let Some(c) = self.peek() {
+            if c.is_ascii_digit() {
+                self.next();
+                cnt += 1;
+            } else {
+                if cnt < min {
+                    return Err(Errors::InvalidValue);
+                }
+                break;
+            }
+        }
+
+        return if cnt >= min {
+            Ok(())
+        } else {
+            Err(Errors::InvalidValue)
+        };
+    }
 }
 
 impl<'json> Context<'json> {
@@ -121,28 +143,6 @@ impl Parser<'_> {
         };
     }
 
-    fn consume_digits(iter: &mut Iter, min: usize) -> Result<()> {
-        let mut cnt: usize = 0;
-        /* consume at least n digits */
-        while let Some(c) = iter.peek() {
-            if c.is_ascii_digit() {
-                iter.next();
-                cnt += 1;
-            } else {
-                if cnt < min {
-                    return Err(Errors::InvalidValue);
-                }
-                break;
-            }
-        }
-
-        return if cnt >= min {
-            Ok(())
-        } else {
-            Err(Errors::InvalidValue)
-        };
-    }
-
     fn parse_number(&mut self) -> Result<Value> {
         let mut iter = self.context.iter();
 
@@ -155,7 +155,7 @@ impl Parser<'_> {
         match iter.next() {
             Some('0') => { /* continue */ }
             Some(c) => match c.is_ascii_digit() {
-                true => Parser::consume_digits(&mut iter, 0)?,
+                true => iter.consume_digits(0)?,
                 false => return Err(Errors::InvalidValue),
             },
             None => return Err(Errors::InvalidValue),
@@ -168,7 +168,7 @@ impl Parser<'_> {
                 match c {
                     '.' => {
                         iter.next(); /* skip the decimal point */
-                        Parser::consume_digits(&mut iter, 1)?
+                        iter.consume_digits(1)?
                     }
                     'e' | 'E' => { /* exp field, continue */ }
                     _ => {
@@ -213,7 +213,7 @@ impl Parser<'_> {
                 }
 
                 /* match one or more digits */
-                Parser::consume_digits(&mut iter, 1)?;
+                iter.consume_digits(1)?;
             }
         }
         // F**king Painful! I will definitely use regex in the future :)
