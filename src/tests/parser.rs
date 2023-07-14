@@ -136,4 +136,6 @@ fn invalid_string() {
     invalid_assert!(quote!(r#"\'"#), InvalidStringEscape);
     invalid_assert!(quote!(r#"\0"#), InvalidStringEscape);
     invalid_assert!(quote!("\x12"), InvalidStringChar);
+    invalid_assert!(r#""\"#, MissingQuotationMark); // "\
+    invalid_assert!(r#"""#, MissingQuotationMark); // "
 }

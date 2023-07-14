@@ -255,7 +255,7 @@ impl Parser<'_> {
                     Some('r') => chars.push('\r'),
                     Some('t') => chars.push('\t'),
                     Some(_) => return Err(Errors::InvalidStringEscape),
-                    None => return Err(Errors::InvalidValue),
+                    None => return Err(Errors::MissingQuotationMark),
                 },
                 /* TODO: Unicode is not considered */
                 c if (c as u8) < 0x20 => return Err(Errors::InvalidStringChar),
