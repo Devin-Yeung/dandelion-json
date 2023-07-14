@@ -105,6 +105,12 @@ impl<'json> Context<'json> {
         }
         &self.json[self.cursor..self.cursor + n]
     }
+
+    pub fn next(&mut self) -> Option<char> {
+        let ret = self.cur();
+        self.advance();
+        ret
+    }
 }
 
 impl Parser<'_> {
@@ -223,6 +229,42 @@ impl Parser<'_> {
         })
     }
 
+    fn parse_string(&mut self) -> Result<Value> {
+        if self.context.next() != Some('\"') {
+            return Err(Errors::InvalidValue);
+        }
+
+        let mut chars = Vec::<char>::new();
+
+        while let Some(c) = self.context.next() {
+            match c {
+                /* reach the end of string */
+                '\"' => {
+                    return Ok(Value {
+                        v_type: ValueType::String(chars.into_iter().collect::<String>()),
+                    });
+                }
+                /* escape sequence */
+                '\\' => match self.context.next() {
+                    Some('\"') => chars.push('\"'),
+                    Some('\\') => chars.push('\\'),
+                    Some('/') => chars.push('/'),
+                    Some('b') => chars.push('\x08'),
+                    Some('f') => chars.push('\x0C'),
+                    Some('n') => chars.push('\n'),
+                    Some('r') => chars.push('\r'),
+                    Some('t') => chars.push('\t'),
+                    Some(_) => return Err(Errors::InvalidStringEscape),
+                    None => return Err(Errors::InvalidValue),
+                },
+                /* TODO: Unicode is not considered */
+                c if (c as u8) < 0x20 => return Err(Errors::InvalidStringChar),
+                _ => chars.push(c),
+            }
+        }
+        return Err(Errors::MissingQuotationMark);
+    }
+
     fn parse_value(&mut self) -> Result<Value> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
@@ -230,6 +272,7 @@ impl Parser<'_> {
                 't' => self.parse_literal("true", ValueType::Bool(true)),
                 'f' => self.parse_literal("false", ValueType::Bool(false)),
                 'n' => self.parse_literal("null", ValueType::Null),
+                '\"' => self.parse_string(),
                 _ => self.parse_number(),
             },
         };

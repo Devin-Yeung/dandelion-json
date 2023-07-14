@@ -101,3 +101,39 @@ fn parse_invalid_num() {
     invalid_assert!("1ee", InvalidValue); /* bad exp field */
     invalid_assert!("1e", InvalidValue); /* bad exp field */
 }
+
+macro_rules! quote {
+    ($str:expr) => {
+        format!("\"{}\"", $str)
+    };
+}
+
+#[test]
+fn parse_string() {
+    json_assert!(quote!("Hello"), String("Hello".to_string()));
+    json_assert!(
+        quote!(r#"Hello\nWorld"#),
+        String("Hello\nWorld".to_string())
+    );
+    /* special char */
+    json_assert!(quote!(r#"\""#), String("\"".to_string()));
+    json_assert!(quote!(r#"\\"#), String("\\".to_string()));
+    json_assert!(quote!(r#"\/"#), String("/".to_string()));
+    json_assert!(quote!(r#"\n"#), String("\n".to_string()));
+    json_assert!(quote!(r#"\r"#), String("\r".to_string()));
+    json_assert!(quote!(r#"\t"#), String("\t".to_string()));
+    json_assert!(quote!(r#"\b"#), String("\x08".to_string()));
+    json_assert!(quote!(r#"\f"#), String("\x0C".to_string()));
+    json_assert!(
+        quote!(r#"\"\\\/\n\r\t\b\f"#),
+        String("\"\\/\n\r\t\x08\x0C".to_string())
+    )
+}
+
+#[test]
+fn invalid_string() {
+    invalid_assert!(quote!(r#"\v"#), InvalidStringEscape);
+    invalid_assert!(quote!(r#"\'"#), InvalidStringEscape);
+    invalid_assert!(quote!(r#"\0"#), InvalidStringEscape);
+    invalid_assert!(quote!("\x12"), InvalidStringChar);
+}
