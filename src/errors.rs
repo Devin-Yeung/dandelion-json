@@ -14,6 +14,8 @@ pub enum Errors {
     RootNotSingular,
     #[error("EOF is reached")]
     ReachEOF,
+    #[error("Number too big")]
+    NumberTooBig,
 }
 
 pub type Result<T> = std::result::Result<T, Errors>;

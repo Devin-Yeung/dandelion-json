@@ -102,6 +102,12 @@ fn parse_invalid_num() {
     invalid_assert!("1e", InvalidValue); /* bad exp field */
 }
 
+#[test]
+fn parse_large_num() {
+    invalid_assert!("1e309", NumberTooBig);
+    // invalid_assert!("1e-618", NumberTooBig); // this should underflow
+}
+
 macro_rules! quote {
     ($str:expr) => {
         format!("\"{}\"", $str)

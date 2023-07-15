@@ -221,7 +221,11 @@ impl Parser<'_> {
 
         let num = iter.looked();
         let steps = num.len();
-        let num = num.parse::<f64>().map_err(|_| Errors::InvalidValue)?;
+        let num = match num.parse::<f64>().map_err(|_| Errors::InvalidValue)? {
+            num if num == f64::INFINITY => return Err(Errors::NumberTooBig),
+            num => num,
+        };
+
         self.context.advance_n(steps);
 
         Ok(Value {
