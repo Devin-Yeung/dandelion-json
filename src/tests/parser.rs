@@ -14,6 +14,15 @@ macro_rules! invalid_assert {
 }
 
 #[test]
+fn not_singular_root() {
+    invalid_assert!("null x", RootNotSingular);
+    // FIXME: enable the following tests after `parse_number` is fixed
+    // invalid_assert!("0123", RootNotSingular); /* after zero should be '.' or nothing */
+    // invalid_assert!("0x0", RootNotSingular); /* after zero should be '.' or nothing */
+    // invalid_assert!("0x123", RootNotSingular); /* after zero should be '.' or nothing */
+}
+
+#[test]
 fn parse_null() {
     json_assert!("null", Null);
     json_assert!("null", Null);

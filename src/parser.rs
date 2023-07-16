@@ -307,6 +307,10 @@ impl Parser<'_> {
     {
         let mut parser = Parser::new(json);
         parser.parse_whitespace();
-        return parser.parse_value();
+        let ret = parser.parse_value()?;
+        return match parser.context.next() {
+            None => Ok(ret),
+            Some(_) => Err(Errors::RootNotSingular),
+        };
     }
 }
