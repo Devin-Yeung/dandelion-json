@@ -1,5 +1,6 @@
 macro_rules! json_assert {
     ($json:expr, $val:expr) => {{
+        #[allow(unused_imports)]
         use $crate::data::Value::*;
         assert_eq!($crate::parser::Parser::parse(&$json), Ok($val))
     }};
@@ -141,4 +142,21 @@ fn invalid_string() {
     invalid_assert!(quote!("\x12"), InvalidStringChar);
     invalid_assert!(r#""\"#, MissingQuotationMark); // "\
     invalid_assert!(r#"""#, MissingQuotationMark); // "
+}
+
+macro_rules! arr {
+    ($($item:expr),* $(,)?) => {{
+        use $crate::data::Value::*;
+        Array(
+            vec![$($item),*]
+        )
+    }};
+}
+
+#[test]
+fn valid_array() {
+    json_assert!("[true]", arr![Bool(true)]);
+    json_assert!("[ true]", arr![Bool(true)]);
+    json_assert!("[ true ]", arr![Bool(true)]);
+    json_assert!("[null,null]", arr!(Null, Null));
 }

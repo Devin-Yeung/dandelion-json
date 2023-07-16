@@ -265,6 +265,28 @@ impl Parser<'_> {
         return Err(Errors::MissingQuotationMark);
     }
 
+    fn parse_array(&mut self) -> Result<Value> {
+        assert_eq!(self.context.next(), Some('['));
+        let mut array = Vec::<Value>::new();
+        loop {
+            self.parse_whitespace();
+            array.push(self.parse_value()?);
+            self.parse_whitespace();
+            if let Some(c) = self.context.next() {
+                match c {
+                    ',' => { /* just continue parsing */ }
+                    ']' => {
+                        return Ok(Value::Array(array));
+                    }
+                    ' ' => {
+                        unreachable!()
+                    }
+                    _ => return Err(Errors::MissingCommaOrClosingBracket),
+                }
+            }
+        }
+    }
+
     fn parse_value(&mut self) -> Result<Value> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
@@ -272,6 +294,7 @@ impl Parser<'_> {
                 't' => self.parse_literal("true", Value::Bool(true)),
                 'f' => self.parse_literal("false", Value::Bool(false)),
                 'n' => self.parse_literal("null", Value::Null),
+                '[' => self.parse_array(),
                 '\"' => self.parse_string(),
                 _ => self.parse_number(),
             },

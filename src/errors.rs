@@ -10,6 +10,8 @@ pub enum Errors {
     InvalidStringChar,
     #[error("Quotation mark is missing")]
     MissingQuotationMark,
+    #[error("Comma or closing bracket is missing")]
+    MissingCommaOrClosingBracket,
     #[error("Root is not singular")]
     RootNotSingular,
     #[error("EOF is reached")]
