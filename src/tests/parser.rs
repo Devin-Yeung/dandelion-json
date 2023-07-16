@@ -1,10 +1,7 @@
 macro_rules! json_assert {
-    ($json:expr, $vtype:expr) => {{
-        use $crate::data::ValueType::*;
-        assert_eq!(
-            $crate::parser::Parser::parse(&$json),
-            Ok($crate::data::Value { v_type: $vtype })
-        )
+    ($json:expr, $val:expr) => {{
+        use $crate::data::Value::*;
+        assert_eq!($crate::parser::Parser::parse(&$json), Ok($val))
     }};
 }
 

@@ -1,4 +1,4 @@
-use crate::data::{Value, ValueType};
+use crate::data::Value;
 use crate::errors::{Errors, Result};
 
 pub struct Context<'json> {
@@ -135,7 +135,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_literal<S>(&mut self, literal: S, v_type: ValueType) -> Result<Value>
+    fn parse_literal<S>(&mut self, literal: S, value: Value) -> Result<Value>
     where
         S: AsRef<str>,
     {
@@ -143,7 +143,7 @@ impl Parser<'_> {
         return match self.context.peek(literal.len()) == literal {
             true => {
                 self.context.advance_n(literal.len());
-                Ok(Value { v_type })
+                Ok(value)
             }
             false => Err(Errors::InvalidValue),
         };
@@ -228,9 +228,7 @@ impl Parser<'_> {
 
         self.context.advance_n(steps);
 
-        Ok(Value {
-            v_type: ValueType::Number(num),
-        })
+        Ok(Value::Number(num))
     }
 
     fn parse_string(&mut self) -> Result<Value> {
@@ -244,9 +242,7 @@ impl Parser<'_> {
             match c {
                 /* reach the end of string */
                 '\"' => {
-                    return Ok(Value {
-                        v_type: ValueType::String(chars.into_iter().collect::<String>()),
-                    });
+                    return Ok(Value::String(chars.into_iter().collect::<String>()));
                 }
                 /* escape sequence */
                 '\\' => match self.context.next() {
@@ -273,9 +269,9 @@ impl Parser<'_> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
             Some(c) => match c {
-                't' => self.parse_literal("true", ValueType::Bool(true)),
-                'f' => self.parse_literal("false", ValueType::Bool(false)),
-                'n' => self.parse_literal("null", ValueType::Null),
+                't' => self.parse_literal("true", Value::Bool(true)),
+                'f' => self.parse_literal("false", Value::Bool(false)),
+                'n' => self.parse_literal("null", Value::Null),
                 '\"' => self.parse_string(),
                 _ => self.parse_number(),
             },
