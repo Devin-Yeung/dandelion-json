@@ -190,3 +190,12 @@ fn valid_array() {
         )
     )
 }
+
+#[test]
+fn invalid_json() {
+    invalid_assert!("[", MissingCommaOrClosingBracket);
+    invalid_assert!("[   ", MissingCommaOrClosingBracket);
+    invalid_assert!("[ null  ", MissingCommaOrClosingBracket);
+    invalid_assert!("[[] ", MissingCommaOrClosingBracket);
+    invalid_assert!("]", InvalidValue);
+}
