@@ -167,4 +167,5 @@ fn valid_array() {
     json_assert!("[ true]", arr![Bool(true)]);
     json_assert!("[ true ]", arr![Bool(true)]);
     json_assert!("[null,null]", arr!(Null, Null));
+    json_assert!("[]", arr!());
 }

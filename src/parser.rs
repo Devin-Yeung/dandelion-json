@@ -246,6 +246,11 @@ impl Parser<'_> {
     fn parse_array(&mut self) -> Result<Value> {
         assert_eq!(self.context.next(), Some('['));
         let mut array = Vec::<Value>::new();
+        self.parse_whitespace();
+        if self.context.cur() == Some(']') {
+            self.context.next();
+            return Ok(Value::Array(array));
+        }
         loop {
             self.parse_whitespace();
             array.push(self.parse_value()?);
