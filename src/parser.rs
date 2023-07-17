@@ -210,9 +210,7 @@ impl Parser<'_> {
     }
 
     fn parse_string(&mut self) -> Result<Value> {
-        if self.context.next() != Some('\"') {
-            return Err(Errors::InvalidValue);
-        }
+        assert_eq!(self.context.next(), Some('\"'));
 
         let mut chars = Vec::<char>::new();
 
