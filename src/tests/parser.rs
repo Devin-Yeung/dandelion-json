@@ -16,10 +16,12 @@ macro_rules! invalid_assert {
 #[test]
 fn not_singular_root() {
     invalid_assert!("null x", RootNotSingular);
-    // FIXME: enable the following tests after `parse_number` is fixed
-    // invalid_assert!("0123", RootNotSingular); /* after zero should be '.' or nothing */
-    // invalid_assert!("0x0", RootNotSingular); /* after zero should be '.' or nothing */
-    // invalid_assert!("0x123", RootNotSingular); /* after zero should be '.' or nothing */
+    invalid_assert!("1u10", RootNotSingular); /* bad exp field */
+    invalid_assert!("0123", RootNotSingular); /* after zero should be '.' or nothing */
+    invalid_assert!("0x0", RootNotSingular); /* after zero should be '.' or nothing */
+    invalid_assert!("0x123", RootNotSingular); /* after zero should be '.' or nothing */
+    invalid_assert!("001", RootNotSingular); /* after zero should be '.' or nothing */
+    invalid_assert!("00.1", RootNotSingular); /* after zero should be '.' or nothing */
 }
 
 #[test]
@@ -94,8 +96,6 @@ fn parse_invalid_num() {
     /* invalid number */
     invalid_assert!("+0", InvalidValue);
     invalid_assert!("+1", InvalidValue);
-    invalid_assert!("001", InvalidValue);
-    invalid_assert!("00.1", InvalidValue);
     invalid_assert!(".123", InvalidValue); /* at least one digit before '.' */
     invalid_assert!("1.", InvalidValue); /* at least one digit after '.' */
     invalid_assert!("0.", InvalidValue); /* at least one digit after '.' */
@@ -104,7 +104,6 @@ fn parse_invalid_num() {
     invalid_assert!("NAN", InvalidValue);
     invalid_assert!("nan", InvalidValue);
     invalid_assert!("-", InvalidValue);
-    invalid_assert!("1u10", InvalidValue); /* bad exp field */
     invalid_assert!("1ee", InvalidValue); /* bad exp field */
     invalid_assert!("1e", InvalidValue); /* bad exp field */
 }

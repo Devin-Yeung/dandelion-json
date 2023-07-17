@@ -158,63 +158,41 @@ impl Parser<'_> {
         }
 
         /* match the digits before decimal point */
-        if let Some(c) = iter.next() {
+        if let Some(c) = iter.peek() {
             match c {
-                '0' => { /* continue */ }
+                '0' => {
+                    iter.next();
+                }
                 c => match c.is_ascii_digit() {
-                    true => iter.consume_digits(0)?,
+                    true => iter.consume_digits(1)?,
                     false => return Err(Errors::InvalidValue),
                 },
             }
-        } else {
-            return Err(Errors::InvalidValue);
         }
 
         /* match decimal point */
-        if let Some(c) = iter.peek() {
-            match c {
-                '.' => {
-                    iter.next(); /* skip the decimal point */
-                    iter.consume_digits(1)?
-                }
-                'e' | 'E' => { /* exp field, continue */ }
-                _ => {
-                    return Err(Errors::InvalidValue);
-                }
-            }
+        if iter.peek() == Some('.') {
+            iter.next(); /* skip the decimal point */
+            iter.consume_digits(1)?
         }
 
         /* match exponential field */
-        if let Some(c) = iter.peek() {
+        match iter.peek() {
             /* match e | E */
-            match c {
-                'e' | 'E' => {
-                    iter.next(); /* continue parsing */
-                }
-                _ => {
-                    unreachable!();
-                }
-            }
-
-            /* match + | - */
-            if let Some(c) = iter.peek() {
-                match c {
-                    '+' | '-' => {
+            Some('e') | Some('E') => {
+                iter.next();
+                /* match + | - */
+                match iter.peek() {
+                    Some('+') | Some('-') => {
                         iter.next();
                     }
-                    /* + | - is optional, if not appear, can only follow digits */
-                    _ => {
-                        if !c.is_ascii_digit() {
-                            return Err(Errors::InvalidValue);
-                        }
-                    }
+                    _ => { /* continue */ }
                 }
-            } else {
-                return Err(Errors::InvalidValue);
+                /* + | - is optional, if not appear, can only follow digits */
+                /* match one or more digits */
+                iter.consume_digits(1)?;
             }
-
-            /* match one or more digits */
-            iter.consume_digits(1)?;
+            _ => {}
         }
         // F**king Painful! I will definitely use regex in the future :)
         // Regex Ver: r"(?:^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)"
