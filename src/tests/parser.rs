@@ -120,26 +120,29 @@ macro_rules! quote {
     };
 }
 
+macro_rules! str {
+    ($str:expr) => {
+        $crate::data::Value::String($str.to_string())
+    };
+}
+
 #[test]
 fn parse_string() {
-    json_assert!(quote!("Hello"), String("Hello".to_string()));
+    json_assert!(quote!("Hello"), str!("Hello"));
     json_assert!(
         quote!(r#"Hello\nWorld"#),
         String("Hello\nWorld".to_string())
     );
     /* special char */
-    json_assert!(quote!(r#"\""#), String("\"".to_string()));
-    json_assert!(quote!(r#"\\"#), String("\\".to_string()));
-    json_assert!(quote!(r#"\/"#), String("/".to_string()));
-    json_assert!(quote!(r#"\n"#), String("\n".to_string()));
-    json_assert!(quote!(r#"\r"#), String("\r".to_string()));
-    json_assert!(quote!(r#"\t"#), String("\t".to_string()));
-    json_assert!(quote!(r#"\b"#), String("\x08".to_string()));
-    json_assert!(quote!(r#"\f"#), String("\x0C".to_string()));
-    json_assert!(
-        quote!(r#"\"\\\/\n\r\t\b\f"#),
-        String("\"\\/\n\r\t\x08\x0C".to_string())
-    )
+    json_assert!(quote!(r#"\""#), str!("\""));
+    json_assert!(quote!(r#"\\"#), str!("\\"));
+    json_assert!(quote!(r#"\/"#), str!("/"));
+    json_assert!(quote!(r#"\n"#), str!("\n"));
+    json_assert!(quote!(r#"\r"#), str!("\r"));
+    json_assert!(quote!(r#"\t"#), str!("\t"));
+    json_assert!(quote!(r#"\b"#), str!("\x08"));
+    json_assert!(quote!(r#"\f"#), str!("\x0C"));
+    json_assert!(quote!(r#"\"\\\/\n\r\t\b\f"#), str!("\"\\/\n\r\t\x08\x0C"))
 }
 
 #[test]
