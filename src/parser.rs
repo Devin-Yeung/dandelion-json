@@ -209,7 +209,7 @@ impl Parser<'_> {
         Ok(Value::Number(num))
     }
 
-    fn parse_string(&mut self) -> Result<Value> {
+    fn parse_raw_string(&mut self) -> Result<String> {
         assert_eq!(self.context.next(), Some('\"'));
 
         let mut chars = Vec::<char>::new();
@@ -218,7 +218,7 @@ impl Parser<'_> {
             match c {
                 /* reach the end of string */
                 '\"' => {
-                    return Ok(Value::String(chars.into_iter().collect::<String>()));
+                    return Ok(chars.into_iter().collect::<String>());
                 }
                 /* escape sequence */
                 '\\' => match self.context.next() {
@@ -239,6 +239,10 @@ impl Parser<'_> {
             }
         }
         return Err(Errors::MissingQuotationMark);
+    }
+
+    fn parse_string(&mut self) -> Result<Value> {
+        Ok(Value::String(self.parse_raw_string()?))
     }
 
     fn parse_array(&mut self) -> Result<Value> {
