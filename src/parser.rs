@@ -1,5 +1,6 @@
 use crate::data::Value;
 use crate::errors::{Errors, Result};
+use std::collections::HashMap;
 
 pub struct Context<'json> {
     json: &'json str,
@@ -271,6 +272,59 @@ impl Parser<'_> {
         }
     }
 
+    fn parse_pair(&mut self) -> Result<(String, Value)> {
+        assert_eq!(self.context.cur(), Some('\"'));
+        let key = self.parse_raw_string()?;
+        self.parse_whitespace();
+        match self.context.cur() {
+            Some(':') => {
+                self.context.next();
+                self.parse_whitespace();
+            }
+            _ => {
+                return Err(Errors::MissingSemicolon);
+            }
+        }
+
+        let value = self.parse_value()?;
+        Ok((key, value))
+    }
+
+    fn parse_object(&mut self) -> Result<Value> {
+        assert_eq!(self.context.next(), Some('{'));
+        let mut object = HashMap::<String, Value>::new();
+        loop {
+            self.parse_whitespace();
+            match self.context.cur() {
+                Some('\"') => {
+                    let (key, val) = self.parse_pair()?;
+                    object.insert(key, val);
+                }
+                /* empty object */
+                Some('}') => {
+                    self.context.next();
+                    return Ok(Value::Object(object));
+                }
+                _ => {
+                    return Err(Errors::MissingKey);
+                }
+            }
+
+            match self.context.cur() {
+                Some(',') => {
+                    self.context.next();
+                }
+                Some('}') => {
+                    self.context.next();
+                    return Ok(Value::Object(object));
+                }
+                _ => {
+                    return Err(Errors::MissingCommaOrClosingCurlyBracket);
+                }
+            }
+        }
+    }
+
     fn parse_value(&mut self) -> Result<Value> {
         return match self.context.cur() {
             None => Err(Errors::ReachEOF),
@@ -279,6 +333,7 @@ impl Parser<'_> {
                 'f' => self.parse_literal("false", Value::Bool(false)),
                 'n' => self.parse_literal("null", Value::Null),
                 '[' => self.parse_array(),
+                '{' => self.parse_object(),
                 '\"' => self.parse_string(),
                 _ => self.parse_number(),
             },
