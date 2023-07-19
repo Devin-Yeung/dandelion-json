@@ -309,7 +309,7 @@ impl Parser<'_> {
                     return Err(Errors::MissingKey);
                 }
             }
-
+            self.parse_whitespace();
             match self.context.cur() {
                 Some(',') => {
                     self.context.next();
@@ -347,6 +347,7 @@ impl Parser<'_> {
         let mut parser = Parser::new(json);
         parser.parse_whitespace();
         let ret = parser.parse_value()?;
+        parser.parse_whitespace();
         return match parser.context.next() {
             None => Ok(ret),
             Some(_) => Err(Errors::RootNotSingular),
