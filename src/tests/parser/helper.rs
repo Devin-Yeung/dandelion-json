@@ -38,3 +38,13 @@ macro_rules! arr {
         )
     }};
 }
+
+#[macro_export]
+macro_rules! nums {
+    ($($item:expr),* $(,)?) => {{
+        use $crate::data::Value::*;
+        Array(
+            vec![$(Number($item.into())),*]
+        )
+    }};
+}
