@@ -1,6 +1,6 @@
-use crate::data::Value;
-use crate::data::Value::Number;
 use crate::{arr, invalid_assert, json_assert, str};
+use dandelion_json::data::Value;
+use dandelion_json::data::Value::Number;
 use std::collections::HashMap;
 
 #[test]

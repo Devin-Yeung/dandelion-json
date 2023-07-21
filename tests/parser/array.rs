@@ -1,5 +1,4 @@
-use crate::arr;
-use crate::{invalid_assert, json_assert};
+use crate::{arr, invalid_assert, json_assert};
 
 #[test]
 fn valid_array() {

@@ -1,11 +1,11 @@
-use crate::parser::Context;
+use dandelion_json::parser::Context;
 
 #[test]
 fn valid_cur() {
     let json = "012345";
     let context = Context::new(json);
 
-    assert_eq!(context.cur(), Some('0'),)
+    assert_eq!(context.cur(), Some('0'))
 }
 
 #[test]

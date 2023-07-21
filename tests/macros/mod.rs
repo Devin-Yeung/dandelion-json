@@ -2,16 +2,16 @@
 macro_rules! json_assert {
     ($json:expr, $val:expr) => {{
         #[allow(unused_imports)]
-        use $crate::data::Value::*;
-        assert_eq!($crate::parser::Parser::parse(&$json), Ok($val))
+        use dandelion_json::data::Value::*;
+        assert_eq!(::dandelion_json::parser::Parser::parse(&$json), Ok($val))
     }};
 }
 
 #[macro_export]
 macro_rules! invalid_assert {
     ($json:expr, $error:expr) => {{
-        use $crate::errors::Errors::*;
-        assert_eq!($crate::parser::Parser::parse(&$json), Err($error))
+        use dandelion_json::errors::Errors::*;
+        assert_eq!(::dandelion_json::parser::Parser::parse(&$json), Err($error))
     }};
 }
 
@@ -25,14 +25,14 @@ macro_rules! quote {
 #[macro_export]
 macro_rules! str {
     ($str:expr) => {
-        $crate::data::Value::String($str.to_string())
+        ::dandelion_json::data::Value::String($str.to_string())
     };
 }
 
 #[macro_export]
 macro_rules! arr {
     ($($item:expr),* $(,)?) => {{
-        use $crate::data::Value::*;
+        use ::dandelion_json::data::Value::*;
         Array(
             vec![$($item),*]
         )
@@ -42,7 +42,7 @@ macro_rules! arr {
 #[macro_export]
 macro_rules! nums {
     ($($item:expr),* $(,)?) => {{
-        use $crate::data::Value::*;
+        use ::dandelion_json::data::Value::*;
         Array(
             vec![$(Number($item.into())),*]
         )
