@@ -23,16 +23,18 @@ fn immutable_index() {
     assert_eq!(value["s"], str!("abc"));
     assert_eq!(value["a"], nums!(1, 2, 3));
     let object = &value["o"];
-    assert_eq!(object["1"], Value::Number(1.0));
-    assert_eq!(object["2"], Value::Number(2.0));
-    assert_eq!(object["3"], Value::Number(3.0));
+    assert_eq!(object[String::from("1")], Value::Number(1.0));
+    assert_eq!(object[String::from("2")], Value::Number(2.0));
+    assert_eq!(object[String::from("3")], Value::Number(3.0));
 }
 
 #[test]
 fn mutable_index() {
     let mut value = Parser::parse("{}").unwrap();
-    value["key"] = Value::Bool(true);
-    assert_eq!(value["key"], Value::Bool(true));
+    value["foo"] = Value::Bool(true);
+    value[String::from("bar")] = Value::Bool(false);
+    assert_eq!(value["foo"], Value::Bool(true));
+    assert_eq!(value["bar"], Value::Bool(false));
 }
 
 #[test]
@@ -42,8 +44,22 @@ fn out_of_bound_null() {
 }
 
 #[test]
+fn empty_null() {
+    let mut value = Value::Null;
+    value["key"] = Value::Bool(true);
+    assert_eq!(value["key"], Value::Bool(true));
+}
+
+#[test]
 #[should_panic]
 fn out_of_bound_panic() {
     let mut value = Parser::parse("[0, 1, 2]").unwrap();
     value[3] = Value::Number(3.0);
+}
+
+#[test]
+#[should_panic]
+fn array_cant_be_changed_by_str_index() {
+    let mut value = Parser::parse("[0, 1, 2]").unwrap();
+    value["foo"] = Value::Number(3.0);
 }
